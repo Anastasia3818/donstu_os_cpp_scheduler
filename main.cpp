@@ -1,3 +1,4 @@
+#include "hrrn.h"
 #include "fcfs.h"
 #include "sjf.h"
 #include "srtn.h"
@@ -134,6 +135,36 @@ int main() {
     FcfsScheduler a(set), b(loaded);
     printResult(runSimulation(a));
     printResult(runSimulation(b)); // строки должны совпасть
+  }
+  {
+    // Набор для сравнения SJF и HRRN
+    std::vector<Process> procs;
+    auto add = [&](int pid, const std::string& name, std::uint64_t arrival,
+                   std::uint64_t burst, int priority) {
+      Process p;
+      p.pid = pid;
+      p.name = name;
+      p.arrivalTime = arrival;
+      p.burstTime = burst;
+      p.remainingTime = burst;
+      p.priority = priority;
+      p.dynamicPriority = priority;
+      procs.push_back(p);
+    };
+    add(1, "A",  0, 4, 1);
+    add(2, "L",  1, 6, 1);
+    add(3, "S1", 4, 2, 1);
+    add(4, "S2", 5, 1, 1);
+
+    std::cout << "\n=== Сравнение SJF и HRRN ===\n";
+    SjfScheduler  sjf(procs);
+    HrrnScheduler hrrn(procs);
+    SimResult r1 = runSimulation(sjf);
+    SimResult r2 = runSimulation(hrrn);
+    printResult(r1);
+    printGantt(r1);
+    printResult(r2);
+    printGantt(r2);
   }
   return 0;
 }
