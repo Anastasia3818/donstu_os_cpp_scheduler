@@ -144,6 +144,26 @@ void runExperiment10() {
     std::cout << std::setw(9) << sum / 5 << "\n";
   }
 }
+void printMultiResult(const SimResult& r) {
+  std::cout << std::left << std::setw(20) << r.algorithm
+            << " | wait=" << std::setw(6) << std::fixed << std::setprecision(2) << r.avgWaiting
+            << " | turn=" << std::setw(6) << r.avgTurnaround
+            << " | resp=" << std::setw(6) << r.avgResponse
+            << " | CPU=" << std::setw(6) << r.cpuUtilization << "%"
+            << " | CS=" << std::setw(3) << r.contextSwitches
+            << " | done=" << r.throughput
+            << " | ticks=" << r.totalTicks
+            << "\n";
+  for (std::size_t c = 0; c < r.coreGantt.size(); ++c) {
+    std::cout << "  core " << c << ": ";
+    for (auto& [pid, span] : r.coreGantt[c]) {
+      if (span.first == span.second) continue;
+      if (pid == -1) std::cout << "idle[" << span.first << "-" << span.second << ") ";
+      else std::cout << "P" << pid << "[" << span.first << "-" << span.second << ") ";
+    }
+    std::cout << "\n";
+  }
+}
 int main() {
   std::cout << "Case 1: CPU-bound\n";
   {
@@ -294,5 +314,18 @@ int main() {
   }
   std::cout << "\n";
   runExperiment10();
-  return 0;
+  {
+    std::cout << "\n=== Многоядерный режим (makeTestSet) ===\n";
+    auto set = makeTestSet();
+    for (int cores : {1, 2, 4}) {
+      FcfsScheduler fcfs(set);
+      printMultiResult(runSimulationMulti(fcfs, cores));
+      SjfScheduler sjf(set);
+      printMultiResult(runSimulationMulti(sjf, cores));
+      SrtnScheduler srtn(set);
+      printMultiResult(runSimulationMulti(srtn, cores));
+      std::cout << "\n";
+    }
+  } 
+ return 0;
 }
