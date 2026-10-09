@@ -126,10 +126,10 @@ int main() {
   }
   {
     auto set = makeTestSet();
-    saveSet("set_basic.txt", set);
+    saveSet("sets/set_basic.txt", set);
     std::vector<Process> loaded;
-    if (!loadSet("set_basic.txt", loaded)) {
-      std::cerr << "Не удалось загрузить set_basic.txt\n";
+    if (!loadSet("sets/set_basic.txt", loaded)) {
+      std::cerr << "Не удалось загрузить sets/set_basic.txt\n";
       return 1;
     }
     FcfsScheduler a(set), b(loaded);
