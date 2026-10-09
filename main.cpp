@@ -79,7 +79,30 @@ void printGantt(const SimResult& r) {
     else std::cout << "P" << pid << "\n";  }
   std::cout << "\n";
 }
-
+std::vector<Process> makeConvoySet() {
+  std::vector<Process> procs;
+  auto add = [&](int pid, const std::string& name, std::uint64_t arrival,
+                 std::uint64_t burst, int priority,
+                 std::vector<IoBlock> io = {}) {
+    Process p;
+    p.pid = pid;
+    p.name = name;
+    p.arrivalTime = arrival;
+    p.burstTime = burst;
+    p.remainingTime = burst;
+    p.priority = priority;
+    p.dynamicPriority = priority;
+    p.ioBlocks = std::move(io);
+    procs.push_back(p);
+  };
+  // Два вычислительных процесса
+  add(1, "CPU1", 0, 20, 2);
+  add(4, "CPU2", 3, 12, 3);
+  // Два интерактивных процесса: много коротких вычислений между блокировками
+  add(2, "IO1", 1, 6, 1, {{1, 4}, {2, 4}, {3, 4}, {4, 4}, {5, 4}});
+  add(3, "IO2", 2, 6, 1, {{1, 4}, {2, 4}, {3, 4}, {4, 4}, {5, 4}});
+  return procs;
+}
 int main() {
   std::cout << "Case 1: CPU-bound\n";
   {
@@ -196,6 +219,37 @@ int main() {
                 << " " << std::setw(3) << r.contextSwitches << " "
                 << std::string(r.contextSwitches, '#') << "\n";
     }
+  }
+  {
+    auto set = makeConvoySet();
+    std::cout << "\n=== Задание 6. Набор с несколькими I/O ===\n";
+
+    FcfsScheduler fcfs(set);
+    SimResult r1 = runSimulation(fcfs);
+    printResult(r1);
+    std::cout << "По процессам (FCFS):\n";
+    printProcessTable(fcfs.processes());
+    printGantt(r1);
+
+    SrtnScheduler srtn(set);
+    SimResult r2 = runSimulation(srtn);
+    printResult(r2);
+    std::cout << "По процессам (SRTN):\n";
+    printProcessTable(srtn.processes());
+
+    RrScheduler rr(set, 4);
+    SimResult r3 = runSimulation(rr);
+    printResult(r3);
+
+    PriorityScheduler prio(set, true, true);
+    SimResult r4 = runSimulation(prio);
+    printResult(r4);
+
+    MlfqScheduler mlfq(set);
+    SimResult r5 = runSimulation(mlfq);
+    printResult(r5);
+    std::cout << "По процессам (MLFQ):\n";
+    printProcessTable(mlfq.processes());
   }
   return 0;
 }
