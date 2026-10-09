@@ -12,6 +12,7 @@ add_executable(donstu_os_cpp_scheduler main.cpp
     sjf.h
     srtn.h
     hrrn.h
+    edf.h
     rr.h
     priority.h
     mlfq.h
