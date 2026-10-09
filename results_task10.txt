@@ -1,0 +1,40 @@
+  [36-39) IDLE
+  [39-40) P2
+  [40-41) P3
+  [41-44) IDLE
+  [44-45) P2
+  [45-46) P3
+  [46-49) IDLE
+  [49-50) P2
+  [50-51) P3
+  [51-54) IDLE
+  [54-55) P2
+  [55-56) P3
+
+SRTN                           | wait=8.50    | turn=29.50   | resp=0.00    | CPU=100.00% | CS=19   | done=4
+По процессам (SRTN):
+Proc   arrival  burst   start  finish   wait   turn   resp     io
+CPU1         0     20       0      44     24     44      0      0
+CPU2         3     12       3      19      4     16      0      0
+IO1          1      6       1      30      3     29      0     20
+IO2          2      6       2      31      3     29      0     20
+RR (q=4)                       | wait=18.25   | turn=39.25   | resp=2.25    | CPU=93.62 % | CS=20   | done=4
+Priority (preemptive) + aging  | wait=13.00   | turn=34.00   | resp=2.50    | CPU=100.00% | CS=21   | done=4
+MLFQ                           | wait=12.25   | turn=33.25   | resp=0.75    | CPU=100.00% | CS=23   | done=4
+По процессам (MLFQ):
+Proc   arrival  burst   start  finish   wait   turn   resp     io
+CPU1         0     20       0      38     18     38      0      0
+CPU2         3     12       4      44     29     41      1      0
+IO1          1      6       2      28      1     27      1     20
+IO2          2      6       3      29      1     27      1     20
+
+Average waiting time
+Algorithm       set 1    set 2    set 3    set 4    set 5  average
+FCFS            33.67    46.50    41.06    56.17    68.20    49.12
+SJF             26.25    37.43    29.56    38.44    47.65    35.87
+SRTN            23.83    35.07    28.06    36.72    45.45    33.83
+HRRN            28.67    39.43    32.75    39.28    50.50    38.12
+RR q=4          38.92    58.86    47.69    66.56    82.60    58.92
+Prio            35.67    42.14    40.69    50.56    72.25    48.26
+Prio+aging      40.83    45.79    44.75    54.17    74.05    51.92
+MLFQ            48.33    62.86    51.50    70.00    79.95    62.53

@@ -12,6 +12,7 @@
 #include <vector>
 #include <memory>
 #include "testsets.h"
+#include <functional>
 
 std::vector<Process> makeTestSet() {
   std::vector<Process> procs;
@@ -102,6 +103,46 @@ std::vector<Process> makeConvoySet() {
   add(2, "IO1", 1, 6, 1, {{1, 4}, {2, 4}, {3, 4}, {4, 4}, {5, 4}});
   add(3, "IO2", 2, 6, 1, {{1, 4}, {2, 4}, {3, 4}, {4, 4}, {5, 4}});
   return procs;
+}
+// Сравнение алгоритмов на 5 наборах. Заголовки по-английски: setw считает байты UTF-8
+using Factory = std::function<std::unique_ptr<Scheduler>(const std::vector<Process>&)>;
+
+template <class T, class... Args>
+Factory factory(Args... args) {
+  return [=](const std::vector<Process>& s) {
+    return std::make_unique<T>(s, args...);
+  };
+}
+
+void runExperiment10() {
+  std::vector<std::pair<std::string, Factory>> algos = {
+      {"FCFS", factory<FcfsScheduler>()},
+      {"SJF", factory<SjfScheduler>()},
+      {"SRTN", factory<SrtnScheduler>()},
+      {"HRRN", factory<HrrnScheduler>()},
+      {"RR q=4", factory<RrScheduler>(4)},
+      {"Prio", factory<PriorityScheduler>(false, false)},
+      {"Prio+aging", factory<PriorityScheduler>(true, true)},
+      {"MLFQ", factory<MlfqScheduler>()},
+  };
+  const int sizes[5] = {12, 14, 16, 18, 20};
+  std::cout << "Average waiting time\n";
+  std::cout << std::left << std::setw(12) << "Algorithm" << std::right;
+  for (int i = 1; i <= 5; ++i)
+    std::cout << std::setw(9) << "set " + std::to_string(i);
+  std::cout << std::setw(9) << "average" << "\n";
+  for (auto& [label, make] : algos) {
+    std::cout << std::left << std::setw(12) << label << std::right;
+    double sum = 0;
+    for (unsigned seed = 1; seed <= 5; ++seed) {
+      auto set = makeRandomSet(seed, sizes[seed - 1]);
+      auto sched = make(set);
+      SimResult r = runSimulation(*sched);
+      sum += r.avgWaiting;
+      std::cout << std::setw(9) << std::fixed << std::setprecision(2) << r.avgWaiting;
+    }
+    std::cout << std::setw(9) << sum / 5 << "\n";
+  }
 }
 int main() {
   std::cout << "Case 1: CPU-bound\n";
@@ -251,5 +292,7 @@ int main() {
     std::cout << "По процессам (MLFQ):\n";
     printProcessTable(mlfq.processes());
   }
+  std::cout << "\n";
+  runExperiment10();
   return 0;
 }
