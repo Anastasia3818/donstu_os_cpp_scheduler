@@ -10,6 +10,7 @@
 #include <iomanip>
 #include <vector>
 #include <memory>
+#include "testsets.h"
 
 std::vector<Process> makeTestSet() {
   std::vector<Process> procs;
@@ -115,6 +116,12 @@ int main() {
     SimResult r = runSimulation(rr);
     printGantt(r);
   }
-
+  {
+    auto set = makeTestSet();
+    RrScheduler rr(set, 2);
+    SimResult r = runSimulation(rr);
+    std::cout << "\nПо процессам, RR (q=2):\n";
+    printProcessTable(rr.processes());
+  }
   return 0;
 }
